@@ -21,26 +21,6 @@ function rod(p, a, b, r, mat) {
   const m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, L, 6), mat);
   m.position.copy(a).addScaledVector(d, .5); m.quaternion.setFromUnitVectors(_up, d.normalize()); m.castShadow = true; p.add(m); return m;
 }
-// galvanised triangular lattice floodlight mast head aimed at (tx, tz)
-function latticeMast(p, x, z, h, tx, tz) {
-  const g = new THREE.Group(); g.position.set(x, 0, z); p.add(g);
-  const galv = M(0xaab0b4, .45, .8), legs = [];
-  for (let i = 0; i < 3; i++) { const a = i * 2.094 + .3; legs.push([Math.cos(a), Math.sin(a)]); }
-  const P = (i, y) => { const r = .55 - .3 * y / h; return new THREE.Vector3(legs[i][0] * r, y, legs[i][1] * r); };
-  for (let i = 0; i < 3; i++) rod(g, P(i, 0), P(i, h), .045, galv);
-  for (let y = 0, k = 0; y < h - .5; y += 1.1, k++) for (let i = 0; i < 3; i++) rod(g, P(i, y), P((i + 1) % 3, y + 1.1), .018, galv);
-  B(-.7, .7, h, h + .12, -.7, .7, galv, g);
-  const head = new THREE.Group(); head.position.y = h + .9; head.rotation.y = Math.atan2(tx - x, tz - z); g.add(head);
-  B(-1.3, 1.3, -.05, .05, -.05, .05, galv, head);
-  const lamp = M(0x2b2f34, .5, .5), lens = glowM(0xd8dde0, 0xfff1d6, 0, 3);
-  for (const lx of [-.9, -.3, .3, .9]) for (const ly of [.45, -.45]) {
-    const L = new THREE.Group(); L.position.set(lx, ly, .1); L.rotation.x = .55; head.add(L);
-    B(-.24, .24, -.18, .18, -.1, .12, lamp, L); B(-.2, .2, -.14, .14, .12, .13, lens, L, { cast: false });
-  }
-  halo(head, 0, 0, .4, 0xfff1d6, 4.5, .55);
-  const s = spot(g, 0, h + .6, 0, (tx - x) * .9, 0, (tz - z) * .9, { i: 3.2, dist: 55, angle: .75, pen: .6, color: 0xfff1d6, halo: false });
-  return g;
-}
 function container(p, x, z, ry, color, y = 0, len = 6.06) {
   const g = new THREE.Group(); g.position.set(x, y, z); g.rotation.y = ry; p.add(g);
   B(-1.22, 1.22, 0, 2.59, -len / 2, len / 2, M(color, .7, .25, { map: TX.corr }), g, { cast: false });
@@ -66,9 +46,7 @@ function buildContext() {
   // a few generic trees around the yard edge
   for (const [x, z] of [[-40, 44], [-26, 45], [26, 45], [40, 44], [-42, 20], [42, 22], [-42, -6], [42, -8]]) oliveTree(C, x + rr(-1, 1), z + rr(-1, 1), rr(1.2, 1.5));
   for (const [x, z] of [[-34, 40], [34, 41], [-41, 32], [41, 34]]) palm(x, z, rr(8, 10.5), rr(-.06, .06), rr(0, 6), C);
-  // floodlight masts flanking the facade, vehicles in the yard
-  latticeMast(C, -24.5, 12.5, 15, -6, 26);
-  latticeMast(C, 12.4, 12.8, 15, -2, 26);
+  // vehicles in the yard
   buildTruck(C, -14.2, 17.5, Math.PI);
   ambulance(C, 19, 21, -1.2);
 }
